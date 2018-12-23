@@ -12,15 +12,15 @@ from xbrl_util import get_etree_obj_from_file
 
 class Parser:
     """xbrlファイル解析クラス"""
-    def __init__(self, file, file_data):
+    def __init__(self, file, file_data, org_file_name):
         self.file = file
 
         # ファイル名解析
-        self.info = self.parse_filename(os_basename(self.file))
+        self.info = self.parse_filename(os_basename(org_file_name))
         if self.info['報告書'] is None:
             # 再解析
-            if 'E25850-' in self.file:
-                self.info = self.parse_filename_e25850(os_basename(self.file))
+            if 'E25850-' in org_file_name:
+                self.info = self.parse_filename_e25850(os_basename(org_file_name))
 
         # XBRLファイル読み込み
         self.root = get_etree_obj_from_file(self.file, file_data)

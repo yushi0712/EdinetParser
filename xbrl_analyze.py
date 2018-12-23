@@ -53,7 +53,7 @@ df_asr_summary = pd.DataFrame(columns=summary_column)
 for index, row in df_xbrl_contents.iterrows():
     start_time = time.perf_counter()
     # XBRLファイルのパス生成
-    xbrl_path = xbrl_common.RENAMED_XBRL_DIR_PATH + r"/" + row["オリジナルファイル"]
+    xbrl_path = xbrl_common.RENAMED_XBRL_DIR_PATH + r"/" + row["リネームファイル"]
     if path.isfile(xbrl_path):
         if row["年度"] == 2018:
             # 基本情報
@@ -64,7 +64,7 @@ for index, row in df_xbrl_contents.iterrows():
             s_asr["業種"] = row["業種"]
             s_asr["年度"] = row["年度"]
             # 財務情報
-            df_xbrl_data = read_xbrl(xbrl_path)
+            df_xbrl_data = read_xbrl(xbrl_path, row["オリジナルファイル"])
             CYI = "CurrentYearInstant"
             P1I = "Prior1YearInstant"
             P2I = "Prior2YearInstant"

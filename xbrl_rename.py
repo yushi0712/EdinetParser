@@ -107,9 +107,9 @@ df_xbrl_contetns.to_excel(xbrl_common.XBRL_CONTENTS_FILE_PATH)
 # ファイルをリネームしてコピー
 for index, row in df_xbrl_contetns.iterrows():
     org_path = xbrl_common.ORIGINAL_XBRL_DIR_PATH + "/" + row["フォルダ"] + "/" + row["オリジナルファイル"]
-#    dest_path = xbrl_common.RENAMED_XBRL_DIR_PATH + "/" + row["リネームファイル"]
+    dest_path = xbrl_common.RENAMED_XBRL_DIR_PATH + "/" + row["リネームファイル"]
     # Temporary:XBRLのParserがファイル名で解析しているので一旦オリジナルファイルと同じ名前にする
-    dest_path = xbrl_common.RENAMED_XBRL_DIR_PATH + "/" + row["オリジナルファイル"]
+    #dest_path = xbrl_common.RENAMED_XBRL_DIR_PATH + "/" + row["オリジナルファイル"]
     if path.isfile(org_path):
         shutil.copyfile(org_path, dest_path)
                    

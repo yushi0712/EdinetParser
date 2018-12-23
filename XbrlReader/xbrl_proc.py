@@ -11,11 +11,11 @@ from xbrl_jpcor import Parser as xbrl_jpcor_Parser
 from xbrl_util import conv_str_to_num
 from xbrl_zip import get_xbrl_files as xbrl_zip_get_xbrl_files
 
-def read_xbrl(xbrl):
+def read_xbrl(xbrl, org_file_name):
     """引数 XBRLファイルパス
 戻り値 pandas.DataFrame"""
     # XBRLからデータ取得
-    df = _get_xbrl_datas(xbrl, None)
+    df = _get_xbrl_datas(xbrl, None, org_file_name)
     return df
 
 
@@ -37,7 +37,7 @@ def read_xbrl_from_zip(xbrl):
     # (「jpfrとifrs」、「jpcrpとifrs」など)
     dfs = []
     for (xbrl_filename, xbrl_file_data) in xbrl_files.items():
-        df = _get_xbrl_datas(xbrl_filename, xbrl_file_data)
+        df = _get_xbrl_datas(xbrl_filename, xbrl_file_data, "")
         if df is not None:
             dfs.append(df)
     return dfs
@@ -46,18 +46,18 @@ def read_xbrl_from_zip(xbrl):
 # XBRLバージョン判定の正規表現
 RE_XBRL_P_V1_MATCH = re.compile('^(?:jpfr|ifrs).*?\.xbrl$').match
 RE_XBRL_P_V2_MATCH = re.compile('^jpcrp.*?\.xbrl$').match
-def _get_xbrl_datas(xbrl_file, xbrl_file_data):
+def _get_xbrl_datas(xbrl_file, xbrl_file_data, org_file_name):
     """データ取得"""
 
     # xbrlファイル読み込み
-    if RE_XBRL_P_V1_MATCH(os_basename(xbrl_file)):
+    if RE_XBRL_P_V1_MATCH(os_basename(org_file_name)):
         # 旧 EDINET XBRL
         # print(xbrl_file)
-        xbrl = xbrl_jpfr_Parser(xbrl_file, xbrl_file_data)
+        xbrl = xbrl_jpfr_Parser(xbrl_file, xbrl_file_data, org_file_name)
         xbrl_ver = 1
-    elif RE_XBRL_P_V2_MATCH(os_basename(xbrl_file)):
+    elif RE_XBRL_P_V2_MATCH(os_basename(org_file_name)):
         # print(xbrl_file)
-        xbrl = xbrl_jpcor_Parser(xbrl_file, xbrl_file_data)
+        xbrl = xbrl_jpcor_Parser(xbrl_file, xbrl_file_data, org_file_name)
         xbrl_ver = 2
     else:
         # 監査報告書のXBRLが該当(jpaud-***.xbrl)
