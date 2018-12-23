@@ -4,10 +4,10 @@ import re
 import sys
 import shutil
 import pandas as pd
+import xbrl_common
 
 sys.path.append(os.path.join(os.path.dirname(__file__), 'XbrlReader'))
 
-from xbrl_proc import read_xbrl
 from os import path
 
 
@@ -28,23 +28,10 @@ class XbrlPresenter:
         self.xbrl_files = xbrl_files
 
 
-XBRL_ROOT_PATH = "C:/local/users/nishimura/Documents/!Theme/財務分析"
-ORIGINAL_XBRL_DIR_NAME = "XBRL"
-RENAMED_XBRL_DIR_NAME = "RenamedXBRL"
-EDINET_INFO_FILE_NAME = "EDINETコード.xlsx"
-XBRL_CONTENTS_FILE_NAME = "XBRL_Contents.xlsx"
-
-ORIGINAL_XBRL_DIR_PATH = XBRL_ROOT_PATH + "/" + ORIGINAL_XBRL_DIR_NAME
-RENAMED_XBRL_DIR_PATH = XBRL_ROOT_PATH + "/" + RENAMED_XBRL_DIR_NAME
-EDINET_INFO_FILE_PATH = XBRL_ROOT_PATH + "/" + EDINET_INFO_FILE_NAME
-XBRL_CONTENTS_FILE_PATH = RENAMED_XBRL_DIR_PATH + "/" + XBRL_CONTENTS_FILE_NAME
-last_year = 2017 # 最終年度
-
-last_year = last_year + 1
+last_year = xbrl_common.last_year + 1
 
 # EDINETの情報をExcelファイルから取得しEDINET情報DataFrameを作成
-#df = read_xbrl(EDINET_INFO_FILE_PATH)
-edinet_info_file = pd.ExcelFile(EDINET_INFO_FILE_PATH)
+edinet_info_file = pd.ExcelFile(xbrl_common.EDINET_INFO_FILE_PATH)
 df_edinet_info = edinet_info_file.parse(edinet_info_file.sheet_names[0], skiprows=[0])
 
 # EDINET情報DataFrameから業種と証券コードを取り出す
@@ -57,15 +44,15 @@ for index, row in df_edinet_info.iterrows():
     
 
 # フォルダ取得
-all_items = os.listdir(ORIGINAL_XBRL_DIR_PATH)
-all_dirs = [f for f in all_items if os.path.isdir(os.path.join(ORIGINAL_XBRL_DIR_PATH, f))]
+all_items = os.listdir(xbrl_common.ORIGINAL_XBRL_DIR_PATH)
+all_dirs = [f for f in all_items if os.path.isdir(os.path.join(xbrl_common.ORIGINAL_XBRL_DIR_PATH, f))]
 
 tmp_count=0
 presenter_list = list()
 for _dir in all_dirs: # 各フォルダ
     edinet_code = _dir[0:6]
     presenter_name = _dir[7:]
-    xbrl_dir_path = ORIGINAL_XBRL_DIR_PATH + "/" + _dir
+    xbrl_dir_path = xbrl_common.ORIGINAL_XBRL_DIR_PATH + "/" + _dir
     if path.isdir(xbrl_dir_path):
         # 初期化
         target_dict = dict()
@@ -109,17 +96,18 @@ for p in presenter_list:
 #========================================
 # ファイルをRename
 #========================================
-if not path.isdir(RENAMED_XBRL_DIR_PATH): # フォルダが無いときは作成する
-    os.mkdir(RENAMED_XBRL_DIR_PATH)
+if not path.isdir(xbrl_common.RENAMED_XBRL_DIR_PATH): # フォルダが無いときは作成する
+    os.mkdir(xbrl_common.RENAMED_XBRL_DIR_PATH)
 # Contentsファイル（Excel）を作成
-df_xbrl_contetns.to_excel(XBRL_CONTENTS_FILE_PATH)
+df_xbrl_contetns.to_excel(xbrl_common.XBRL_CONTENTS_FILE_PATH)
 # ファイルをリネームしてコピー
 for index, row in df_xbrl_contetns.iterrows():
-    org_path = ORIGINAL_XBRL_DIR_PATH + "/" + row["フォルダ"] + "/" + row["オリジナルファイル"]
-    dest_path = RENAMED_XBRL_DIR_PATH + "/" + row["リネームファイル"]
+    org_path = xbrl_common.ORIGINAL_XBRL_DIR_PATH + "/" + row["フォルダ"] + "/" + row["オリジナルファイル"]
+#    dest_path = xbrl_common.RENAMED_XBRL_DIR_PATH + "/" + row["リネームファイル"]
+    # Temporary:XBRLのParserがファイル名で解析しているので一旦オリジナルファイルと同じ名前にする
+    dest_path = xbrl_common.RENAMED_XBRL_DIR_PATH + "/" + row["オリジナルファイル"]
     if path.isfile(org_path):
         shutil.copyfile(org_path, dest_path)
-        print(dest_path)
                    
 #print(xbrl_files) 
 
