@@ -30,11 +30,15 @@ class XbrlPresenter:
 
 last_year = xbrl_common.last_year + 1
 
+#---------------------------------------------------------
 # EDINETの情報をExcelファイルから取得しEDINET情報DataFrameを作成
+#---------------------------------------------------------
 edinet_info_file = pd.ExcelFile(xbrl_common.EDINET_INFO_FILE_PATH)
 df_edinet_info = edinet_info_file.parse(edinet_info_file.sheet_names[0], skiprows=[0])
 
+#---------------------------------------------------------
 # EDINET情報DataFrameから業種と証券コードを取り出す
+#---------------------------------------------------------
 industry_dict = dict()
 securities_code_dict = dict()
 for index, row in df_edinet_info.iterrows():
@@ -81,9 +85,9 @@ for _dir in all_dirs: # 各フォルダ
                                        xbrl_files=xbrl_files)
         presenter_list.append(inst_presenter)
  
-#========================================
+#---------------------------------------------------------
 # XBRL_ContentsのDataFrameを作成
-#========================================
+#---------------------------------------------------------
 contents_column = ["EDINETコード", "提出者名", "証券コード", "業種", "年度", "フォルダ", "オリジナルファイル", "リネームファイル"]
 df_xbrl_contetns = pd.DataFrame(columns=contents_column)
 for p in presenter_list:
