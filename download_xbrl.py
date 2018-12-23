@@ -13,7 +13,8 @@ from edinet_xbrl.edinet_xbrl_downloader import EdinetXbrlDownloader
 
 
 EdinetCodeFilePath = "C:/local/users/nishimura/Documents/!Theme/財務分析/EDINETコード.xlsx"
-XBRL_DIR_PATH = "C:/local/users/nishimura/Documents/!Theme/財務分析/XBRL"
+XBRL_DIR_PATH = "C:/Users/e12135/OneDrive - Konica Minolta/Archives/HDJA-UT/財務データ/XBRL"
+#XBRL_DIR_PATH = "C:/local/users/nishimura/Documents/!Theme/財務分析/XBRL"
 
 # EDINETコードExcelの内容をDataFrameにインポート
 EdinetCodeFile = pd.ExcelFile(EdinetCodeFilePath)
