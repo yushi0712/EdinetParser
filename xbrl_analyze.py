@@ -13,37 +13,22 @@ from xbrl_proc import read_xbrl
 ASR_SUMMARY_FILE_NAME = "ASR_Summary.xlsx"
 
 
-def _get_tag_val(df, tags, contexts=[""]):
-    # tagを探す
-    flag = False
-    for tag in tags:
-        df_tag = df[df["tag"] == tag]
+def _get_tag_val(df, tags_and_contexts):
+    val = ""
+    for tc in tags_and_contexts:
+        # tagを探す
+        df_tag = df[df["tag"] == tc[0]]
         l = len(list(df_tag[df_tag == True].index))
-        if l != 0: # tagを含んでいる
-            flag = True
-            break;
-    if not flag: #tagが見つからなかった
-        return ""
+        if l == 0: # tagが見つからなかった
+            continue
 
-    if contexts[0] == "":
-        val = df_tag["値"].values[0]
-    else:
         # contextを探す
-        flag = False
-        for context in contexts:
-            df_context = df_tag[df_tag["context"] == context]
-            l = len(list(df_context[df_context == True].index))
-            if l != 0: # contextを探す
-                flag = True
-                break;
-        if not flag: #contextが見つからなかった
-            return ""
+        df_context = df_tag[df_tag["context"] == tc[1]]
+        l = len(list(df_context[df_context == True].index))
+        if l == 0: # contextが見つからなかった
+            continue
 
-        if len(df_context) == 0:
-            print("cannto fine context:", context)
-            val=""
-        else:
-            val = df_context["値"].values[0]
+        val = df_context["値"].values[0]
 
     return val
 
@@ -58,7 +43,7 @@ df_xbrl_contents = xbrl_contents_file.parse(xbrl_contents_file.sheet_names[0], s
 #---------------------------------------
 # XBRLファイルを読み込む -> ASR_Summaary作成
 #---------------------------------------
-summary_column = ["EDINETコード", "提出者名", "証券コード", "業種", "年度", "会計基準", "従業員数", "売上高", "純利益", "営業CF", "投資CF", "財務CF", "研究開発費"]
+summary_column = ["EDINETコード", "提出者名", "証券コード", "業種", "年度", "会計基準", "従業員数", "総資産", "売上高", "純利益", "営業CF", "投資CF", "財務CF", "売上／人員"]
 df_asr_summary = pd.DataFrame(columns=summary_column)
 for index, row in df_xbrl_contents.iterrows():
     start_time = time.perf_counter()
@@ -75,14 +60,18 @@ for index, row in df_xbrl_contents.iterrows():
             s_asr["年度"] = row["年度"]
             # 財務情報
             df_xbrl_data = read_xbrl(xbrl_path)
-            s_asr["会計基準"] = _get_tag_val(df_xbrl_data, ["AccountingStandardsDEI"])
-            s_asr["従業員数"] = _get_tag_val(df_xbrl_data, ["NumberOfEmployeeIFRS","NumberOfEmployees"], ["CurrentYearInstant"])
-            s_asr["売上高"] = _get_tag_val(df_xbrl_data, ["RevenuesUSGAAPSummaryOfBusinessResults", "RevenueIFRSSummaryOfBusinessResults", "NetSalesSummaryOfBusinessResults"], ["CurrentYearDuration"])
-            s_asr["純利益"] = _get_tag_val(df_xbrl_data, ["ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults", "ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults", "NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults"], ["CurrentYearDuration"])
-            s_asr["営業CF"] = _get_tag_val(df_xbrl_data, ["CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults", "NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults", "CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults"], ["CurrentYearDuration"])
-            s_asr["投資CF"] = _get_tag_val(df_xbrl_data, ["CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults", "NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults", "CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults"], ["CurrentYearDuration"])
-            s_asr["財務CF"] = _get_tag_val(df_xbrl_data, ["CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults", "NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults", "CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults"], ["CurrentYearDuration"])
-            s_asr["研究開発費"] = _get_tag_val(df_xbrl_data, ["ResearchAndDevelopmentExpensesSGA"], ["CurrentYearDuration", "CurrentYearDuration_NonConsolidatedMember"])
+            CYI = "CurrentYearInstant"
+            CYD = "CurrentYearDuration"
+            CYD_NCM = "CurrentYearDuration_NonConsolidatedMember"
+            s_asr["会計基準"] = _get_tag_val(df_xbrl_data, [["AccountingStandardsDEI", "FilingDateInstant"]])
+            s_asr["従業員数"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeeIFRS",CYI], ["NumberOfEmployees",CYI]])
+            s_asr["総資産"] = _get_tag_val(df_xbrl_data, [["TotalAssetsIFRSSummaryOfBusinessResults",CYI], ["TotalAssetsSummaryOfBusinessResults",CYI], ["TotalAssetsUSGAAPSummaryOfBusinessResults",CYI]])
+            s_asr["売上高"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",CYD], ["NetSalesSummaryOfBusinessResults",CYD], ["RevenuesUSGAAPSummaryOfBusinessResults",CYD]])
+            s_asr["純利益"] = _get_tag_val(df_xbrl_data, [["ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults",CYD], ["ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults",CYD], ["NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults",CYD]])
+            s_asr["営業CF"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",CYD], ["CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults",CYD]])
+            s_asr["投資CF"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",CYD], ["CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults",CYD]])
+            s_asr["財務CF"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",CYD], ["CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults",CYD]])
+            s_asr["売上／人員"] = s_asr["売上高"] / s_asr["従業員数"]
             # DataFrameに追加          
             df_asr_summary = df_asr_summary.append(s_asr, ignore_index=True)
             # 経過表示
