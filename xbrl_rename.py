@@ -47,11 +47,13 @@ for index, row in df_edinet_info.iterrows():
     securities_code_dict[tmp_code] = str(row["証券コード"])
     
 
+#--------------------------------------------------------
+# XBRL関連ファイルの中から必要な(-asr-)ファイルのみを抽出しリスト化
+#---------------------------------------------------------
 # フォルダ取得
 all_items = os.listdir(xbrl_common.ORIGINAL_XBRL_DIR_PATH)
 all_dirs = [f for f in all_items if os.path.isdir(os.path.join(xbrl_common.ORIGINAL_XBRL_DIR_PATH, f))]
 
-tmp_count=0
 presenter_list = list()
 for _dir in all_dirs: # 各フォルダ
     edinet_code = _dir[0:6]
@@ -84,22 +86,29 @@ for _dir in all_dirs: # 各フォルダ
                                        industry=industry_dict[edinet_code],\
                                        xbrl_files=xbrl_files)
         presenter_list.append(inst_presenter)
- 
+
 #---------------------------------------------------------
 # XBRL_ContentsのDataFrameを作成
 #---------------------------------------------------------
+print("◆XBRL_ContentsのDataFrameを作成")
 contents_column = ["EDINETコード", "提出者名", "証券コード", "業種", "年度", "フォルダ", "オリジナルファイル", "リネームファイル"]
 df_xbrl_contetns = pd.DataFrame(columns=contents_column)
-for p in presenter_list:
+for index, p in enumerate(presenter_list):
     for xbrl_file in p.xbrl_files:
         new_file_name = p.edinet_code+"_"+p.name+"_"+xbrl_file.year+"_"+p.industry+".xbrl"
         df = pd.Series([p.edinet_code, p.name, str(p.securities_code),\
                         p.industry, xbrl_file.year, xbrl_file.dir_name, xbrl_file.file_name, new_file_name], index=contents_column)
         df_xbrl_contetns = df_xbrl_contetns.append(df, ignore_index=True)
 
-#========================================
+    if index%100==0:
+        print("\r{0}/{1}".format(index, len(presenter_list)), end="")
+
+print("  -> 完了")
+
+#---------------------------------------------------------
 # ファイルをRename
-#========================================
+#---------------------------------------------------------
+print("◆ファイルをRename")
 if not path.isdir(xbrl_common.RENAMED_XBRL_DIR_PATH): # フォルダが無いときは作成する
     os.mkdir(xbrl_common.RENAMED_XBRL_DIR_PATH)
 # Contentsファイル（Excel）を作成
@@ -112,6 +121,11 @@ for index, row in df_xbrl_contetns.iterrows():
     #dest_path = xbrl_common.RENAMED_XBRL_DIR_PATH + "/" + row["オリジナルファイル"]
     if path.isfile(org_path):
         shutil.copyfile(org_path, dest_path)
+
+    if index%100==0:
+        print("\r{0}/{1}".format(index, len(df_xbrl_contetns)), end="")
+
+print("  -> 完了")
                    
 #print(xbrl_files) 
 
