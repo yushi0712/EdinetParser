@@ -80,8 +80,8 @@ for index, row in df_xbrl_contents.iterrows():
     # XBRLファイルのパス生成
     xbrl_path = xbrl_common.RENAMED_XBRL_DIR_PATH + r"/" + row["リネームファイル"]
     if path.isfile(xbrl_path):
-        keyword = row["EDINETコード"]
-        if (row["年度"]==2018) and (keyword=="E25665"):
+        keyword = row["業種"]
+        if (row["年度"]==2017) and (keyword=="電気機器"):
             # 基本情報
             s_asr = pd.Series(index=summary_column)
             s_asr["EDINETコード"] = row["EDINETコード"]

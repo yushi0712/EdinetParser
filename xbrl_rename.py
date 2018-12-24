@@ -70,15 +70,21 @@ for _dir in all_dirs: # 各フォルダ
         target_asr_file = dict()
         for asr in asr_files:
             tmp = re.split("[-_]", asr)
-            if int(tmp[8]) > target_dict[tmp[5]]:
-                target_dict[tmp[5]] = int(tmp[8]) # tmp5が年度 tmp[8]が通番
-                target_asr_file[tmp[5]] = asr
+            int_y = int(tmp[5]) # 提出年(整数)
+            int_m = int(tmp[6]) # 提出月(整数)
+            int_a = int_y # 年度
+            if int_m != 12: # 提出月が12月以外の場合は補正
+                int_a = int_y-1
+            str_a = str(int_a)
+            if int(tmp[8]) > target_dict[str_a]:
+                target_dict[str_a] = int(tmp[8]) # str_aが年度 tmp[8]が通番
+                target_asr_file[str_a] = asr
         # target_filesに各年の最新rev.の有価証券報告書ファイルを格納する      
         xbrl_files = list()
-        for y in range(last_year, last_year-10, -1): # 各年度のファイルを抽出
-            str_y = str(y)
-            if target_dict[str_y] != 0: 
-                inst_xbrl_file = XbrlFile(_dir, target_asr_file[str_y], str_y)
+        for a in range(last_year, last_year-10, -1): # 各年度のファイルを抽出
+            str_a = str(a)
+            if target_dict[str_a] != 0: 
+                inst_xbrl_file = XbrlFile(_dir, target_asr_file[str_a], str_a)
                 xbrl_files.append(inst_xbrl_file)
             
         inst_presenter = XbrlPresenter(presenter_name, edinet_code,\
