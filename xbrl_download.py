@@ -23,7 +23,6 @@ df_sheet = EdinetCodeFile.parse(sheet_names[0], skiprows=[0])
 
 # XBRLのダウンロード対象となる提出者のリストを作成しDataFrameに格納する
 count = 0
-submitter_categoly = ["精密機器", "電気機器", "機械", "化学", "輸送用機器"]
 dir_list = list()
 column_list = ["EDINET Code", "Name", "Dir"]
 df_presenter = pd.DataFrame(columns=column_list)
