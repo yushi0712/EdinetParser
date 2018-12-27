@@ -10,8 +10,6 @@ sys.path.append(os.path.join(os.path.dirname(__file__), 'XbrlReader'))
 from os import path
 from xbrl_proc import read_xbrl
 
-ASR_SUMMARY_FILE_NAME = "ASR_Summary.xlsx"
-
 
 def _get_tag_val(df, tags_and_contexts):
     val = ""
@@ -160,7 +158,7 @@ print("  -> 完了", "平均処理時間:{0:.3f}秒".format(elapsed_time/len(df_
 #---------------------------------------
 print("◆ASR_SummaaryをExcelファイルに保存", end="")
 df_industry = pd.DataFrame(list(set(df_asr_summary["業種"])), columns=["業種"])
-with pd.ExcelWriter(xbrl_common.XBRL_ROOT_PATH + "/" + ASR_SUMMARY_FILE_NAME) as writer:
+with pd.ExcelWriter(xbrl_common.XBRL_ROOT_PATH + "/" + xbrl_common.ASR_SUMMARY_FILE_NAME) as writer:
     df_asr_summary.to_excel(writer, sheet_name="OrgData")
     df_industry.to_excel(writer, sheet_name="業種")
 print("  -> 完了")
