@@ -33,7 +33,6 @@ def _get_tag_val(df, tags_and_contexts):
 
     return val
 
-
 #---------------------------------------
 # XBRL Contentsファイルを読み込む
 #---------------------------------------
@@ -149,10 +148,10 @@ for index, row in df_xbrl_contents.iterrows():
             #print("{0:.1f}[sec]".format(time.perf_counter()-start_time), index+1, "/", len(df_xbrl_contents),\
             #      row["EDINETコード"], row["提出者名"], row["年度"])
     print("\r{0}/{1} ({2})".format(index, len(df_xbrl_contents), len(df_asr_summary)), end="")
-    # Debug用break
-    if len(df_asr_summary) > 100:
-        sys.exit()
-    #break;
+    # Debug用
+    #if len(df_asr_summary) > 10:
+    #    sys.exit()
+
 elapsed_time = time.perf_counter() - start_time
 print("  -> 完了", "平均処理時間:{0:.3f}秒".format(elapsed_time/len(df_asr_summary)))
 
@@ -160,6 +159,9 @@ print("  -> 完了", "平均処理時間:{0:.3f}秒".format(elapsed_time/len(df_
 # ASR_SummaaryをExcelファイルに保存
 #---------------------------------------
 print("◆ASR_SummaaryをExcelファイルに保存", end="")
-df_asr_summary.to_excel(xbrl_common.XBRL_ROOT_PATH + "/" + ASR_SUMMARY_FILE_NAME)
+df_industry = pd.DataFrame(list(set(df_asr_summary["業種"])), columns=["業種"])
+with pd.ExcelWriter(xbrl_common.XBRL_ROOT_PATH + "/" + ASR_SUMMARY_FILE_NAME) as writer:
+    df_asr_summary.to_excel(writer, sheet_name="OrgData")
+    df_industry.to_excel(writer, sheet_name="業種")
 print("  -> 完了")
 
