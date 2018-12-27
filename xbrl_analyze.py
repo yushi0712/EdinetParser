@@ -32,9 +32,25 @@ for index, row in df_asr_summary.iterrows():
 #---------------------------------------
 # 業種ごとにDataFrameを作成
 #---------------------------------------
-df_specified_industry = dict()    
+df_specified_industries = dict()    
 for index, row in df_industry.iterrows():
     q_word = "業種 == \"{0}\"".format(row["業種"])
-    df_specified_industry[row["業種"]] = df_asr_summary.query(q_word)
+    df_specified_industries[row["業種"]] = df_asr_summary.query(q_word)
 
+
+
+df_corr_mat= dict()    
+for index, row in df_industry.iterrows():
+    industry = row["業種"]
+    df_temp = df_specified_industries[industry]
+    df_available = df_temp[df_temp["空欄数"]==0]
+    df_industry.at[index, "提出社数"] = len(df_temp)
+    df_industry.at[index, "有効提出社数"] = len(df_available)
+    df_industry.at[index, "有効提出社率"] = 100*df_industry.at[index, "有効提出社数"]/df_industry.at[index, "提出社数"]
+    df_industry.at[index, "従業員数(平均)"] = int(df_available["従業員数"].mean())
+    df_industry.at[index, "従業員数(中央)"] = int(df_available["従業員数"].median())
+    df_industry.at[index, "売上高(平均)"] = int(df_available["売上高"].mean())
+    df_industry.at[index, "売上高(中央)"] = int(df_available["売上高"].median())
+
+    df_corr_mat[industry] = df_available.corr(method='pearson')
 
