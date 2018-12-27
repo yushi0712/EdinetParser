@@ -34,7 +34,6 @@ def _get_tag_val(df, tags_and_contexts):
     return val
 
 
-
 #---------------------------------------
 # XBRL Contentsファイルを読み込む
 #---------------------------------------
@@ -75,13 +74,14 @@ P1D_NCM = "Prior1YearDuration_NonConsolidatedMember"
 P2D_NCM = "Prior2YearDuration_NonConsolidatedMember"
 P3D_NCM = "Prior3YearDuration_NonConsolidatedMember"
 P4D_NCM = "Prior4YearDuration_NonConsolidatedMember"
+industry_list = ["電気機器", "精密機器", "機械", "化学", "情報・通信業", "輸送用機器", "非鉄金属", "医薬品", "鉄鋼"]
+start_time = time.perf_counter()
 for index, row in df_xbrl_contents.iterrows():
-    start_time = time.perf_counter()
     # XBRLファイルのパス生成
     xbrl_path = xbrl_common.RENAMED_XBRL_DIR_PATH + r"/" + row["リネームファイル"]
     if path.isfile(xbrl_path):
         keyword = row["業種"]
-        if (row["年度"]==2017) and (keyword=="電気機器"):
+        if (row["年度"]==2017):
             # 基本情報
             s_asr = pd.Series(index=summary_column)
             s_asr["EDINETコード"] = row["EDINETコード"]
@@ -93,45 +93,45 @@ for index, row in df_xbrl_contents.iterrows():
             df_xbrl_data = read_xbrl(xbrl_path, row["オリジナルファイル"])
             s_asr["会計基準"] = _get_tag_val(df_xbrl_data, [["AccountingStandardsDEI", "FilingDateInstant"]])
             
-            s_asr["従業員数"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeeIFRS",CYI], ["NumberOfEmployees",CYI], ["NumberOfEmployees",CYI_NCM]])
+            s_asr["従業員数"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeesIFRSSummaryOfBusinessResults",CYI], ["NumberOfEmployeeIFRS",CYI], ["NumberOfEmployees",CYI], ["NumberOfEmployees",CYI_NCM]])
             s_asr["総資産"] = _get_tag_val(df_xbrl_data, [["TotalAssetsIFRSSummaryOfBusinessResults",CYI], ["TotalAssetsSummaryOfBusinessResults",CYI], ["TotalAssetsUSGAAPSummaryOfBusinessResults",CYI], ["TotalAssetsSummaryOfBusinessResults",CYI_NCM]])
-            s_asr["売上高"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",CYD], ["NetSalesSummaryOfBusinessResults",CYD], ["RevenuesUSGAAPSummaryOfBusinessResults",CYD], ["NetSalesSummaryOfBusinessResults",CYD_NCM], ["OperatingRevenue1SummaryOfBusinessResults",CYD]])
+            s_asr["売上高"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",CYD], ["NetSalesSummaryOfBusinessResults",CYD], ["RevenuesUSGAAPSummaryOfBusinessResults",CYD], ["NetSalesSummaryOfBusinessResults",CYD_NCM], ["OperatingRevenue1SummaryOfBusinessResults",CYD], ["OrdinaryIncomeSummaryOfBusinessResults",CYD], ["OperatingRevenue2SummaryOfBusinessResults",CYD], ["WholeChainStoreSalesSummaryOfBusinessResults",CYD], ["NetSalesAndOperatingRevenue2SummaryOfBusinessResults",CYD], ["NetSalesOfCompletedConstructionContractsSummaryOfBusinessResults",CYD]])
             s_asr["純利益"] = _get_tag_val(df_xbrl_data, [["ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults",CYD], ["ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults",CYD], ["NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults",CYD], ["NetIncomeLossSummaryOfBusinessResults",CYD_NCM]])
             s_asr["営業CF"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",CYD], ["CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",CYD_NCM]])
             s_asr["投資CF"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",CYD], ["CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",CYD_NCM]])
             s_asr["財務CF"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",CYD], ["CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults",CYD], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",CYD_NCM]])
             s_asr["現金"] = _get_tag_val(df_xbrl_data, [["CashAndCashEquivalentsIFRSSummaryOfBusinessResults",CYI], ["CashAndCashEquivalentsSummaryOfBusinessResults",CYI], ["CashAndCashEquivalentsUSGAAPSummaryOfBusinessResults",CYI], ["CashAndCashEquivalentsSummaryOfBusinessResults",CYI_NCM]])
 
-            s_asr["従業員数(P1Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeeIFRS",P1I], ["NumberOfEmployees",P1I], ["NumberOfEmployees",P1I_NCM]])
+            s_asr["従業員数(P1Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeesIFRSSummaryOfBusinessResults",P1I], ["NumberOfEmployeeIFRS",P1I], ["NumberOfEmployees",P1I], ["NumberOfEmployees",P1I_NCM]])
             s_asr["総資産(P1Y)"] = _get_tag_val(df_xbrl_data, [["TotalAssetsIFRSSummaryOfBusinessResults",P1I], ["TotalAssetsSummaryOfBusinessResults",P1I], ["TotalAssetsUSGAAPSummaryOfBusinessResults",P1I], ["TotalAssetsSummaryOfBusinessResults",P1I_NCM]])
-            s_asr["売上高(P1Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P1D], ["NetSalesSummaryOfBusinessResults",P1D], ["RevenuesUSGAAPSummaryOfBusinessResults",P1D], ["NetSalesSummaryOfBusinessResults",P1D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P1D]])
+            s_asr["売上高(P1Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P1D], ["NetSalesSummaryOfBusinessResults",P1D], ["RevenuesUSGAAPSummaryOfBusinessResults",P1D], ["NetSalesSummaryOfBusinessResults",P1D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P1D], ["OrdinaryIncomeSummaryOfBusinessResults",P1D], ["OperatingRevenue2SummaryOfBusinessResults",P1D], ["WholeChainStoreSalesSummaryOfBusinessResults",P1D], ["NetSalesAndOperatingRevenue2SummaryOfBusinessResults",P1D], ["NetSalesOfCompletedConstructionContractsSummaryOfBusinessResults",P1D]])
             s_asr["純利益(P1Y)"] = _get_tag_val(df_xbrl_data, [["ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults",P1D], ["ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults",P1D], ["NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults",P1D], ["NetIncomeLossSummaryOfBusinessResults",P1D_NCM]])
             s_asr["営業CF(P1Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults",P1D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P1D], ["CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults",P1D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P1D_NCM]])
             s_asr["投資CF(P1Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults",P1D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P1D], ["CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults",P1D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P1D_NCM]])
             s_asr["財務CF(P1Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults",P1D], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",P1D], ["CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults",P1D], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",P1D_NCM]])
             s_asr["現金(P1Y)"] = _get_tag_val(df_xbrl_data, [["CashAndCashEquivalentsIFRSSummaryOfBusinessResults",P1I], ["CashAndCashEquivalentsSummaryOfBusinessResults",P1I], ["CashAndCashEquivalentsUSGAAPSummaryOfBusinessResults",P1I], ["CashAndCashEquivalentsSummaryOfBusinessResults",P1I_NCM]])
 
-            s_asr["従業員数(P2Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeeIFRS",P2I], ["NumberOfEmployees",P2I], ["NumberOfEmployees",P2I_NCM]])
+            s_asr["従業員数(P2Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeesIFRSSummaryOfBusinessResults",P1I], ["NumberOfEmployeeIFRS",P2I], ["NumberOfEmployees",P2I], ["NumberOfEmployees",P2I_NCM]])
             s_asr["総資産(P2Y)"] = _get_tag_val(df_xbrl_data, [["TotalAssetsIFRSSummaryOfBusinessResults",P2I], ["TotalAssetsSummaryOfBusinessResults",P2I], ["TotalAssetsUSGAAPSummaryOfBusinessResults",P2I], ["TotalAssetsSummaryOfBusinessResults",P2I_NCM]])
-            s_asr["売上高(P2Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P2D], ["NetSalesSummaryOfBusinessResults",P2D], ["RevenuesUSGAAPSummaryOfBusinessResults",P2D], ["NetSalesSummaryOfBusinessResults",P2D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P2D]])
+            s_asr["売上高(P2Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P2D], ["NetSalesSummaryOfBusinessResults",P2D], ["RevenuesUSGAAPSummaryOfBusinessResults",P2D], ["NetSalesSummaryOfBusinessResults",P2D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P2D], ["OrdinaryIncomeSummaryOfBusinessResults",P2D], ["OperatingRevenue2SummaryOfBusinessResults",P2D], ["WholeChainStoreSalesSummaryOfBusinessResults",P2D], ["NetSalesAndOperatingRevenue2SummaryOfBusinessResults",P2D], ["NetSalesOfCompletedConstructionContractsSummaryOfBusinessResults",P2D]])
             s_asr["純利益(P2Y)"] = _get_tag_val(df_xbrl_data, [["ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults",P2D], ["ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults",P2D], ["NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults",P2D], ["NetIncomeLossSummaryOfBusinessResults",P2D_NCM]])
             s_asr["営業CF(P2Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults",P2D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P2D], ["CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults",P2D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P2D_NCM]])
             s_asr["投資CF(P2Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults",P2D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P2D], ["CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults",P2D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P2D_NCM]])
             s_asr["財務CF(P2Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults",P2D], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",P2D], ["CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults",P2D], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",P2D_NCM]])
             s_asr["現金(P2Y)"] = _get_tag_val(df_xbrl_data, [["CashAndCashEquivalentsIFRSSummaryOfBusinessResults",P2I], ["CashAndCashEquivalentsSummaryOfBusinessResults",P2I], ["CashAndCashEquivalentsUSGAAPSummaryOfBusinessResults",P2I], ["CashAndCashEquivalentsSummaryOfBusinessResults",P2I_NCM]])
 
-            s_asr["従業員数(P3Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeeIFRS",P3I], ["NumberOfEmployees",P3I], ["NumberOfEmployees",P3I_NCM]])
+            s_asr["従業員数(P3Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeesIFRSSummaryOfBusinessResults",P1I], ["NumberOfEmployeeIFRS",P3I], ["NumberOfEmployees",P3I], ["NumberOfEmployees",P3I_NCM]])
             s_asr["総資産(P3Y)"] = _get_tag_val(df_xbrl_data, [["TotalAssetsIFRSSummaryOfBusinessResults",P3I], ["TotalAssetsSummaryOfBusinessResults",P3I], ["TotalAssetsUSGAAPSummaryOfBusinessResults",P3I], ["TotalAssetsSummaryOfBusinessResults",P3I_NCM]])
-            s_asr["売上高(P3Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P3D], ["NetSalesSummaryOfBusinessResults",P3D], ["RevenuesUSGAAPSummaryOfBusinessResults",P3D], ["NetSalesSummaryOfBusinessResults",P3D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P2D]])
+            s_asr["売上高(P3Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P3D], ["NetSalesSummaryOfBusinessResults",P3D], ["RevenuesUSGAAPSummaryOfBusinessResults",P3D], ["NetSalesSummaryOfBusinessResults",P3D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P3D], ["OrdinaryIncomeSummaryOfBusinessResults",P3D], ["OperatingRevenue2SummaryOfBusinessResults",P3D], ["WholeChainStoreSalesSummaryOfBusinessResults",P3D], ["NetSalesAndOperatingRevenue2SummaryOfBusinessResults",P3D], ["NetSalesOfCompletedConstructionContractsSummaryOfBusinessResults",P3D]])
             s_asr["純利益(P3Y)"] = _get_tag_val(df_xbrl_data, [["ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults",P3D], ["ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults",P3D], ["NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults",P3D], ["NetIncomeLossSummaryOfBusinessResults",P3D_NCM]])
             s_asr["営業CF(P3Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults",P3D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P3D], ["CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults",P3D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P3D_NCM]])
             s_asr["投資CF(P3Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults",P3D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P3D], ["CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults",P3D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P3D_NCM]])
             s_asr["財務CF(P3Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInFinancingActivitiesIFRSSummaryOfBusinessResults",P3D], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",P3D], ["CashFlowsFromUsedInFinancingActivitiesUSGAAPSummaryOfBusinessResults",P3D], ["NetCashProvidedByUsedInFinancingActivitiesSummaryOfBusinessResults",P3D_NCM]])
             s_asr["現金(P3Y)"] = _get_tag_val(df_xbrl_data, [["CashAndCashEquivalentsIFRSSummaryOfBusinessResults",P3I], ["CashAndCashEquivalentsSummaryOfBusinessResults",P3I], ["CashAndCashEquivalentsUSGAAPSummaryOfBusinessResults",P3I], ["CashAndCashEquivalentsSummaryOfBusinessResults",P3I_NCM]])
 
-            s_asr["従業員数(P4Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeeIFRS",P4I], ["NumberOfEmployees",P4I], ["NumberOfEmployees",P4I_NCM]])
+            s_asr["従業員数(P4Y)"] = _get_tag_val(df_xbrl_data, [["NumberOfEmployeesIFRSSummaryOfBusinessResults",P1I], ["NumberOfEmployeeIFRS",P4I], ["NumberOfEmployees",P4I], ["NumberOfEmployees",P4I_NCM]])
             s_asr["総資産(P4Y)"] = _get_tag_val(df_xbrl_data, [["TotalAssetsIFRSSummaryOfBusinessResults",P4I], ["TotalAssetsSummaryOfBusinessResults",P4I], ["TotalAssetsUSGAAPSummaryOfBusinessResults",P4I], ["TotalAssetsSummaryOfBusinessResults",P4I_NCM]])
-            s_asr["売上高(P4Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P4D], ["NetSalesSummaryOfBusinessResults",P4D], ["RevenuesUSGAAPSummaryOfBusinessResults",P4D], ["NetSalesSummaryOfBusinessResults",P4D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P2D]])
+            s_asr["売上高(P4Y)"] = _get_tag_val(df_xbrl_data, [["RevenueIFRSSummaryOfBusinessResults",P4D], ["NetSalesSummaryOfBusinessResults",P4D], ["RevenuesUSGAAPSummaryOfBusinessResults",P4D], ["NetSalesSummaryOfBusinessResults",P4D_NCM], ["OperatingRevenue1SummaryOfBusinessResults",P4D], ["OrdinaryIncomeSummaryOfBusinessResults",P4D], ["OperatingRevenue2SummaryOfBusinessResults",P4D], ["WholeChainStoreSalesSummaryOfBusinessResults",P4D], ["NetSalesAndOperatingRevenue2SummaryOfBusinessResults",P4D], ["NetSalesOfCompletedConstructionContractsSummaryOfBusinessResults",P4D]])
             s_asr["純利益(P4Y)"] = _get_tag_val(df_xbrl_data, [["ProfitLossAttributableToOwnersOfParentIFRSSummaryOfBusinessResults",P4D], ["ProfitLossAttributableToOwnersOfParentSummaryOfBusinessResults",P4D], ["NetIncomeLossAttributableToOwnersOfParentUSGAAPSummaryOfBusinessResults",P4D], ["NetIncomeLossSummaryOfBusinessResults",P4D_NCM]])
             s_asr["営業CF(P4Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInOperatingActivitiesIFRSSummaryOfBusinessResults",P4D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P4D], ["CashFlowsFromUsedInOperatingActivitiesUSGAAPSummaryOfBusinessResults",P4D], ["NetCashProvidedByUsedInOperatingActivitiesSummaryOfBusinessResults",P4D_NCM]])
             s_asr["投資CF(P4Y)"] = _get_tag_val(df_xbrl_data, [["CashFlowsFromUsedInInvestingActivitiesIFRSSummaryOfBusinessResults",P4D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P4D], ["CashFlowsFromUsedInInvestingActivitiesUSGAAPSummaryOfBusinessResults",P4D], ["NetCashProvidedByUsedInInvestingActivitiesSummaryOfBusinessResults",P4D_NCM]])
@@ -146,7 +146,8 @@ for index, row in df_xbrl_contents.iterrows():
     print("\r{0}/{1} ({2})".format(index, len(df_xbrl_contents), len(df_asr_summary)), end="")
     # Debug用break
     #break;
-print("  -> 完了")
+elapsed_time = time.perf_counter() - start_time
+print("  -> 完了", "平均処理時間:{0:.3f}秒".format(elapsed_time/len(df_asr_summary)))
 
 #---------------------------------------
 # ASR_SummaaryをExcelファイルに保存
