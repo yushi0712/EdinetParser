@@ -145,6 +145,7 @@ for index, row in df_xbrl_contents.iterrows():
             # 経過表示
             #print("{0:.1f}[sec]".format(time.perf_counter()-start_time), index+1, "/", len(df_xbrl_contents),\
             #      row["EDINETコード"], row["提出者名"], row["年度"])
+
     print("\r{0}/{1} ({2})".format(index, len(df_xbrl_contents), len(df_asr_summary)), end="")
     # Debug用
     #if len(df_asr_summary) > 10:
