@@ -31,7 +31,7 @@ print("  -> 完了")
 #---------------------------------------
 # 提出社ごとの統計値を計算
 #---------------------------------------
-skip_flag = False
+skip_flag = True
 dict_statstic_index = dict()
 if not skip_flag:
     print("◆提出社ごとの統計値を計算")
@@ -120,11 +120,38 @@ df_asr_summary_focused = df_asr_summary_focused[df_asr_summary_focused["従業�
 # 分析結果をExcelファイルに保存
 #---------------------------------------
 print("◆分析結果をExcelファイルに保存", end="")
+import openpyxl as px
+wb = px.Workbook()
+ws_asr_summary = wb.create_sheet(title="全提出社者")
+ws = wb.create_sheet(title="Focused")
+
+from openpyxl.styles.fonts import Font
+font_colmun = Font(b=True, sz=9)
+font_cell = Font(sz=9)
+align_column = px.styles.Alignment(horizontal="center", vertical="center")
+align_cell = px.styles.Alignment(vertical="center")
+
+for i, c in enumerate(df_asr_summary.columns):
+    cell = ws_asr_summary.cell(row=1, column=i+1)
+    cell.value = c
+    cell.font = font_colmun
+    cell.alignment  = align_column
+for index, row in df_asr_summary.iterrows():
+    for j, c in enumerate(row):
+        cell = ws_asr_summary.cell(row=index+2, column=j+1)
+        cell.value = c
+        cell.number_format = u"#,###,,"
+        cell.font = font_cell
+        cell.alignment  = align_cell
+        
+wb.save(xbrl_common.XBRL_ROOT_PATH + "/" + xbrl_common.ASR_ANALYSIS_FILE_NAME)
+'''
 with pd.ExcelWriter(xbrl_common.XBRL_ROOT_PATH + "/" + xbrl_common.ASR_ANALYSIS_FILE_NAME) as writer:
     df_asr_summary.to_excel(writer, sheet_name="全提出社")
     df_asr_summary_focused.to_excel(writer, sheet_name="Focused")
+'''
 print("  -> 完了")
-
+'''
 #---------------------------------------
 # 多変量解析
 #---------------------------------------
@@ -147,6 +174,6 @@ df_temp["主成分2"] = X[:,1]
 
 print(pca.explained_variance_ratio_)
 print(pca.components_)
-
+'''
 
 
