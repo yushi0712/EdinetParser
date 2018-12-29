@@ -132,8 +132,8 @@ print("  -> 完了")
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
-mat_pca_input_data = (df_asr_summary_focused[["従業員数", "総資産"]]).values
-#mat_pca_input_data = (df_asr_summary_focused[["従業員数", "売上高", "総資産", "純利益", "営業CF", "投資CF", "現金"]]).values
+df_temp = df_asr_summary_focused[["EDINETコード", "提出者名", "従業員数", "総資産", "売上高", "純利益", "営業CF"]]
+mat_pca_input_data = (df_asr_summary_focused[["従業員数(5年平均)", "売上高(5年平均)", "総資産(5年平均)", "純利益(5年平均)", "営業CF(5年平均)", "投資CF(5年平均)", "現金(5年平均)"]]).values
 
 
 # 正規化
@@ -141,8 +141,13 @@ sc = MinMaxScaler()
 input_data_scaled = sc.fit_transform(mat_pca_input_data)
 # 主成分分析
 pca = PCA(n_components=mat_pca_input_data.shape[1])
-X = pca.fit_transform(input_data_scaled)
+pca.fit(input_data_scaled)
+X = np.dot(input_data_scaled,pca.components_.T)
+df_temp["主成分1"] = X[:,0]
+df_temp["主成分2"] = X[:,1]
+
 print(pca.explained_variance_ratio_)
+print(pca.components_)
 
 
 
