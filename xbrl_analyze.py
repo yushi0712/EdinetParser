@@ -21,7 +21,7 @@ asr_summary_file = pd.ExcelFile(xbrl_common.XBRL_ROOT_PATH + "/" + xbrl_common.A
 df_asr_summary = asr_summary_file.parse(sheet_name="OrgData")
 df_industry = pd.DataFrame(list(set(df_asr_summary["業種"])), columns=["業種"])
 
-list_column = ["従業員数", "総資産", "売上高", "純利益", "株価収益率", "営業CF", "投資CF", "財務CF", "現金"]
+list_column = ["従業員数", "純資産", "総資産", "売上高", "純利益", "株価収益率", "営業CF", "投資CF", "財務CF", "現金"]
 list_year = ["", "(P1Y)", "(P2Y)", "(P3Y)", "(P4Y)"]
 dict_column= dict()
 for col in list_column:
@@ -31,7 +31,7 @@ print("  -> 完了")
 #---------------------------------------
 # 提出社ごとの統計値を計算
 #---------------------------------------
-skip_flag = True
+skip_flag = False
 dict_statstic_index = dict()
 if not skip_flag:
     print("◆提出社ごとの統計値を計算")
@@ -49,7 +49,9 @@ if not skip_flag:
             dict_statstic_index["営業CF／人員"] = [x / y for (x, y) in zip(row[dict_column["営業CF"]], row[dict_column["従業員数"]])]
             dict_statstic_index["FCF／人員"] = [(x+y) / z for (x, y, z) in zip(row[dict_column["営業CF"]], row[dict_column["投資CF"]], row[dict_column["従業員数"]])]
             dict_statstic_index["純利益／人員"] = [x / y for (x, y) in zip(row[dict_column["純利益"]], row[dict_column["従業員数"]])]
-            dict_statstic_index["ROA"] = [x / y for (x, y) in zip(row[dict_column["純利益"]], row[dict_column["売上高"]])]
+            dict_statstic_index["自己資本比率"] = [x / y for (x, y) in zip(row[dict_column["純資産"]], row[dict_column["総資産"]])]
+            dict_statstic_index["ROE"] = [x / y for (x, y) in zip(row[dict_column["純利益"]], row[dict_column["純資産"]])]
+            dict_statstic_index["ROA"] = [x / y for (x, y) in zip(row[dict_column["純利益"]], row[dict_column["総資産"]])]
         except ZeroDivisionError:
             pass
 
@@ -103,7 +105,6 @@ for index, row in df_industry.iterrows():
     df_industry.at[index, "人員x売上高(相関)"] = np.corrcoef(df_available["従業員数"], df_available["売上高"])[0, 1]#corr_mat.at["従業員数", "売上高"]
     df_industry.at[index, "人員x総資産(相関)"] = np.corrcoef(df_available["従業員数"], df_available["総資産"])[0, 1]
     df_industry.at[index, "売上高x総資産(相関)"] = np.corrcoef(df_available["売上高"], df_available["総資産"])[0, 1]
-    df_industry.at[index, "テスト"] = len(df)
 
 #---------------------------------------
 # 注目業界
@@ -112,19 +113,17 @@ df_asr_summary_focused = pd.DataFrame(columns=df_asr_summary_available.columns)
 for fc in list_focused_industries:
     df_asr_summary_focused = pd.concat([df_asr_summary_focused, df_specified_industries[fc]])
 #従業員数で範囲制限
-df_asr_summary_focused = df_asr_summary_focused[df_asr_summary_focused["従業員数"] < 5000]
+#df_asr_summary_focused = df_asr_summary_focused[df_asr_summary_focused["従業員数"] < 5000]
 df_asr_summary_focused = df_asr_summary_focused[df_asr_summary_focused["従業員数"] > 1000]
 
 #---------------------------------------
 # 分析結果をExcelファイルに保存
 #---------------------------------------
-'''
 print("◆分析結果をExcelファイルに保存", end="")
 with pd.ExcelWriter(xbrl_common.XBRL_ROOT_PATH + "/" + xbrl_common.ASR_ANALYSIS_FILE_NAME) as writer:
     df_asr_summary.to_excel(writer, sheet_name="全提出社")
     df_asr_summary_focused.to_excel(writer, sheet_name="Focused")
 print("  -> 完了")
-'''
 
 #---------------------------------------
 # 多変量解析
@@ -132,8 +131,8 @@ print("  -> 完了")
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler, MinMaxScaler, RobustScaler
 
-df_temp = df_asr_summary_focused[["EDINETコード", "提出者名", "従業員数", "総資産", "売上高", "純利益", "営業CF"]]
-mat_pca_input_data = (df_asr_summary_focused[["従業員数(5年平均)", "売上高(5年平均)", "総資産(5年平均)", "純利益(5年平均)", "営業CF(5年平均)", "投資CF(5年平均)", "現金(5年平均)"]]).values
+df_temp = df_asr_summary_focused[["EDINETコード", "提出者名", "従業員数", "純資産", "総資産", "売上高", "純利益", "営業CF"]]
+mat_pca_input_data = (df_asr_summary_focused[["従業員数(5年平均)", "売上高(5年平均)", "純資産(5年平均)", "総資産(5年平均)", "純利益(5年平均)", "営業CF(5年平均)", "投資CF(5年平均)", "現金(5年平均)"]]).values
 
 
 # 正規化
