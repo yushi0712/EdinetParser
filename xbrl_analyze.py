@@ -27,7 +27,7 @@ dict_column= dict()
 for col in list_column:
     dict_column[col] = [col+s for s in list_year]
 print("  -> 完了")
-
+dict_num_format = dict()
 #---------------------------------------
 # 提出社ごとの統計値を計算
 #---------------------------------------
@@ -122,8 +122,19 @@ df_asr_summary_focused = df_asr_summary_focused[df_asr_summary_focused["従業�
 print("◆分析結果をExcelファイルに保存", end="")
 import openpyxl as px
 wb = px.Workbook()
-ws_asr_summary = wb.create_sheet(title="全提出社者")
+ws_asr_summary = wb["Sheet"]
+ws_asr_summary.title = "全提出社者"
 ws = wb.create_sheet(title="Focused")
+
+dict_num_format["ROA"] = "0.0%"
+dict_num_format["ROE"] = "0.0%"
+dict_num_format["自己資本比率"] = "0.0%"
+dict_num_format["従業員数"] = "#,##0"
+dict_num_format["株価収益率"] = "0.0"
+dict_num_format["売上／人員"] = "#,##0"
+dict_num_format["営業CF／人員"] = "#,##0"
+dict_num_format["FCF／人員"] = "#,##0"
+dict_num_format["純利益／人員"] = "#,##0"
 
 from openpyxl.styles.fonts import Font
 font_colmun = Font(b=True, sz=9)
@@ -136,13 +147,26 @@ for i, c in enumerate(df_asr_summary.columns):
     cell.value = c
     cell.font = font_colmun
     cell.alignment  = align_column
-for index, row in df_asr_summary.iterrows():
-    for j, c in enumerate(row):
-        cell = ws_asr_summary.cell(row=index+2, column=j+1)
-        cell.value = c
-        cell.number_format = u"#,###,,"
+j = 0
+for column_name, item in df_asr_summary.iteritems():
+    if j < 6:
+        num_format = px.styles.numbers.FORMAT_TEXT
+    else :
+        num_format = "#,###,,"
+        for key in dict_num_format:
+            if key in column_name:
+                num_format = dict_num_format[key]
+                break
+    for i, row in enumerate(item):
+        cell = ws_asr_summary.cell(row=i+2, column=j+1)
+        cell.value = row
+        cell.number_format = num_format
         cell.font = font_cell
         cell.alignment  = align_cell
+    j += 1
+
+ws_asr_summary.freeze_panes = "G2"
+ws_asr_summary.auto_filter.ref = "A1:WW1"
         
 wb.save(xbrl_common.XBRL_ROOT_PATH + "/" + xbrl_common.ASR_ANALYSIS_FILE_NAME)
 '''
